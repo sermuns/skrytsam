@@ -1212,25 +1212,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e629b9b98ef3dd8afe6ca2bd0f89306cec16d43d907889945bc5d6687f2f13c7"
 
 [[package]]
-name = "github-profile-stats-rs"
-version = "0.1.0"
-dependencies = [
- "clap",
- "color-eyre",
- "derive_typst_intoval",
- "futures",
- "indicatif",
- "octocrab",
- "serde",
- "serde_yaml_ng",
- "tokio",
- "typst",
- "typst-as-lib",
- "typst-library",
- "typst-svg",
-]
-
-[[package]]
 name = "glidesort"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3277,6 +3258,25 @@ checksum = "8c31071dedf532758ecf3fed987cdb4bd9509f900e026ab684b4ecb81ea49841"
 dependencies = [
  "bytemuck",
  "read-fonts",
+]
+
+[[package]]
+name = "skrytsam"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "color-eyre",
+ "derive_typst_intoval",
+ "futures",
+ "indicatif",
+ "octocrab",
+ "serde",
+ "serde_yaml_ng",
+ "tokio",
+ "typst",
+ "typst-as-lib",
+ "typst-library",
+ "typst-svg",
 ]
 
 [[package]]

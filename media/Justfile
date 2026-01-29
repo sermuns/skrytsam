@@ -1,0 +1,5 @@
+compile:
+	fd -e typ -E lib.typ -x typst c {} -f svg \; -x typst c {} -f png
+
+clean:
+	fd -e typ -E lib.typ -x rm -f {.}.png \; -x rm -f {.}.jpg \; -x rm -f {.}.svg

@@ -1,4 +1,3 @@
-use camino::Utf8PathBuf;
 use clap::Parser;
 use color_eyre::eyre::{WrapErr, bail};
 use derive_typst_intoval::{IntoDict, IntoValue};
@@ -10,6 +9,7 @@ use std::{
     collections::HashMap,
     fs,
     io::Cursor,
+    path::PathBuf,
     sync::{Arc, LazyLock},
 };
 use typst::foundations::{Dict, IntoValue, Value};
@@ -23,7 +23,7 @@ struct Args {
     github_username: String,
 
     #[arg(short, long, default_value = "languages.svg")]
-    output: Utf8PathBuf,
+    output: PathBuf,
 
     /// don't include repos that are forks
     #[arg(long, default_value_t = true)]
@@ -54,9 +54,9 @@ async fn main() -> color_eyre::Result<()> {
 
     static ARGS: LazyLock<Args> = LazyLock::new(Args::parse);
     if ARGS.output.is_dir() {
-        bail!("output must be a file. got `{}`", ARGS.output);
+        bail!("output must be a file. got `{}`", ARGS.output.display());
     } else if ARGS.output.extension().is_some_and(|ext| ext != "svg") {
-        bail!("output must end in .svg. got `{}`", ARGS.output);
+        bail!("output must end in .svg. got `{}`", ARGS.output.display());
     }
 
     let linguist_languages: HashMap<String, LinguistLanguage> =

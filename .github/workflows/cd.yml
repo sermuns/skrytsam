@@ -1,0 +1,98 @@
+name: CD
+on:
+  push:
+    tags:
+      - "*"
+
+env:
+  CRATE_NAME: skrytsam
+
+jobs:
+  github_build:
+    name: Build release binaries
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            name: aarch64-unknown-linux-musl.tar.gz
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            name: x86_64-unknown-linux-gnu.tar.gz
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            name: x86_64-unknown-linux-musl.tar.gz
+          - target: x86_64-apple-darwin
+            os: macOS-latest
+            name: x86_64-apple-darwin.tar.gz
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          target: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+
+      - if: endsWith(matrix.target, '-unknown-linux-musl')
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+
+      - name: build
+        if: ${{ !endsWith(matrix.target, '-unknown-linux-musl') }}
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: build (musl)
+        if: endsWith(matrix.target, '-unknown-linux-musl')
+        run: cross build --release --target ${{ matrix.target }}
+
+      - name: extract tag
+        shell: bash
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        id: extract_tag
+
+      - name: prepare artifacts [-nix]
+        run: |
+          mkdir target/stage
+          cd target/${{ matrix.target }}/release
+          tar czvf ../../stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }} ${{ env.CRATE_NAME }}
+          cd -
+
+      - name: upload artifacs
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }}
+          path: target/stage/*
+          overwrite: true
+
+  github_release:
+    name: Create GitHub Release
+    needs: github_build
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v7
+
+      - name: extract version
+        shell: bash
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        id: extract_version
+
+      - name: write release notes
+        run: |
+          sed -n '/^## \[${{ steps.extract_version.outputs.version }}\].*$/,/^## /p' CHANGELOG.md | sed '$d' > RELEASE.md
+
+      - name: publish
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.CRATE_NAME }}-*/${{ env.CRATE_NAME }}-*
+          body_path: RELEASE.md

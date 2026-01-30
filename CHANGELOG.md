@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.2](https://github.com/sermuns/skrytsam/compare/v0.1.1...v0.1.2) - 2026-01-30
+
+### Fixed
+
+- *(ci)* openssl sys vendored for musl
+
+### Other
+
+- bump some deps
+
 ## [0.1.1](https://github.com/sermuns/skrytsam/compare/v0.1.0...v0.1.1) - 2026-01-30
 
 ### Other

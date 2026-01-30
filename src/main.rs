@@ -175,12 +175,7 @@ async fn main() -> color_eyre::Result<()> {
     }));
     input.insert("languages".into(), Value::Dict(languages_dict));
 
-    // HACK: because typst-as-lib uses internal blocking reqwest to resolve packages we have
-    // to spawn this as blocking..
-    let languages_svg = tokio::task::spawn_blocking(move || {
-        compile_svg(include_str!("../src/languages.typ"), input)
-    })
-    .await??;
+    let languages_svg = compile_svg(include_str!("../src/languages.typ"), input)?;
 
     fs::write(&ARGS.output, languages_svg)?;
 

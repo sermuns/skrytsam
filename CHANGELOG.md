@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/sermuns/skrytsam/compare/v0.1.0...v0.1.1) - 2026-01-30
+
+### Other
+
+- add release-plz
+- v0.1.0
+
 ## v0.1.0 - 2026-01-30
 
 ### 🚜 Refactor

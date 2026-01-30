@@ -44,11 +44,11 @@ jobs:
 
       - name: build
         if: ${{ !endsWith(matrix.target, '-unknown-linux-musl') }}
-        run: cargo build --release --target ${{ matrix.target }}
+        run: cargo build --verbose --release --target ${{ matrix.target }}
 
       - name: build (musl)
         if: endsWith(matrix.target, '-unknown-linux-musl')
-        run: cross build --release --target ${{ matrix.target }}
+        run: cross build --verbose --release --target ${{ matrix.target }}
 
       - name: extract tag
         shell: bash

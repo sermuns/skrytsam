@@ -175,7 +175,7 @@ async fn main() -> color_eyre::Result<()> {
     }));
     input.insert("languages".into(), Value::Dict(languages_dict));
 
-    let languages_svg = compile_svg(include_str!("../src/languages.typ"), input)?;
+    let languages_svg = compile_svg(include_str!("../typst/languages.typ"), input)?;
 
     fs::write(&ARGS.output, languages_svg)?;
 

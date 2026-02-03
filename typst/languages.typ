@@ -1,18 +1,8 @@
 #import "@preview/cetz:0.4.2": canvas
 #import "@preview/cetz-plot:0.1.3": chart
+#import "lib.typ": card
 
-#set page(
-  width: auto,
-  height: auto,
-  margin: 1em,
-  fill: blue.desaturate(50%).darken(75%),
-)
-#set text(
-  // font: sys.inputs.at("font", default: "Noto Sans"),
-  font: "Monaspace Krypton",
-  fill: luma(90%),
-)
-#show heading: set block(below: 1em)
+#show: card
 
 #let languages = sys.inputs.at(
   "languages",
@@ -33,10 +23,8 @@
 
 #grid(
   columns: 2,
-  gutter: 1em,
   grid(
     columns: 3,
-    gutter: 1em,
     align: (x, y) => horizon + if x == 2 { right } else { left },
     ..languages-pairs
       .map(((lang-name, v)) => (

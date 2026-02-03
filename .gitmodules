@@ -1,0 +1,9 @@
+[submodule "typst/packages/cetz"]
+	path = typst/packages/cetz
+	url = https://github.com/cetz-package/cetz
+	shallow = true
+
+[submodule "typst/packages/cetz-plot"]
+	path = typst/packages/cetz-plot
+	url = https://github.com/cetz-package/cetz-plot
+	shallow = true

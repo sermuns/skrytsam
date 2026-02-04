@@ -57,7 +57,7 @@ jobs:
 
       - name: prepare artifacts [-nix]
         run: |
-          mkdir target/stage
+          mkdir -p target/stage
           cd target/${{ matrix.target }}/release
           tar czvf ../../stage/${{ env.CRATE_NAME }}-${{ steps.extract_tag.outputs.tag }}-${{ matrix.name }} ${{ env.CRATE_NAME }}
 

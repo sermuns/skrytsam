@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.5](https://github.com/sermuns/skrytsam/compare/v0.1.4...v0.1.5) - 2026-02-04
+
+### Fixed
+
+- cache in a place we have permissions
+
+### Other
+
+- build for more linux arches. FIX where it was not including fonts, had to use git-lfs...
+
 ## [0.1.4](https://github.com/sermuns/skrytsam/compare/v0.1.3...v0.1.4) - 2026-02-04
 
 ### Added

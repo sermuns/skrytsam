@@ -1,0 +1,4 @@
+[build.env]
+passthrough = [
+  "XDG_CACHE_HOME=/target/.cache"
+]

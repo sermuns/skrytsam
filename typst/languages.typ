@@ -1,7 +1,7 @@
-#import "@preview/cetz:0.4.2": canvas
-#import "@preview/cetz-plot:0.1.3": chart
-#import "lib.typ": card
+#import "./packages/cetz/src/lib.typ": canvas
+#import "./packages/cetz-plot/src/lib.typ": chart
 
+#import "lib.typ": card
 #show: card
 
 #let languages = sys.inputs.at(

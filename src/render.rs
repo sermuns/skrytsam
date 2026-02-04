@@ -1,6 +1,9 @@
+use std::borrow::Cow;
+
 use color_eyre::eyre::{ContextCompat, bail};
 use rust_embed::Embed;
-use typst_as_lib::{TypstAsLibError, TypstEngine};
+use typst::syntax::{FileId, Source, VirtualPath};
+use typst_as_lib::{TypstAsLibError, TypstEngine, conversions::IntoSource};
 use typst_library::{
     diag::Warned,
     foundations::Dict,
@@ -12,26 +15,32 @@ const NOTO_SANS_BOLD: &[u8] = include_bytes!("../assets/NotoSans-Bold.ttf");
 const MONASPACE_KRYPTON: &[u8] = include_bytes!("../assets/MonaspaceKrypton-Regular.otf");
 const MONASPACE_KRYPTON_BOLD: &[u8] = include_bytes!("../assets/MonaspaceKrypton-Bold.otf");
 
-const LANGUAGES_TEMPLATE: &str = include_str!("../typst/languages.typ");
-const COMMON_LIB: &str = include_str!("../typst/lib.typ");
-
 #[derive(Embed)]
-#[folder = "typst/packages/"]
-#[include = "*.typ"]
+#[folder = "typst/"]
 #[exclude = "**/tests/*"]
 #[exclude = "**/gallery/*"]
-struct TypstPackage;
+struct TypstSource;
 
-impl TypstPackage {
-    fn iter_path_contents()
+impl TypstSource {
+    fn iter_sources() -> impl Iterator<Item = Source> {
+        TypstSource::iter().filter_map(|path| {
+            dbg!(&path);
+            let embedded_file = TypstSource::get(&path)?;
+
+            let contents = match embedded_file.data {
+                Cow::Borrowed(bytes) => std::str::from_utf8(bytes).ok()?.to_string(),
+                Cow::Owned(bytes) => String::from_utf8(bytes).ok()?,
+            };
+
+            let file_id = FileId::new(None, VirtualPath::new(path.as_ref()));
+            Some((file_id, contents).into_source())
+        })
+    }
 }
 
 pub fn compile_svg(input: Dict) -> color_eyre::Result<String> {
     let engine = TypstEngine::builder()
-        .with_static_source_file_resolver([
-            ("languages.typ", LANGUAGES_TEMPLATE),
-            ("lib.typ", COMMON_LIB),
-        ].iter().chain(TypstPackage::iter_path_contents()))
+        .with_static_source_file_resolver(TypstSource::iter_sources())
         .fonts([
             NOTO_SANS_REGULAR,
             NOTO_SANS_BOLD,
@@ -40,7 +49,7 @@ pub fn compile_svg(input: Dict) -> color_eyre::Result<String> {
         ])
         .build();
 
-    let warned_document: Warned<Result<PagedDocument, TypstAsLibError>> =
+    let warned_document: Warned<Result<PagedDocument, _>> =
         engine.compile_with_input("languages.typ", input);
 
     let warnings = warned_document.warnings;
@@ -48,7 +57,7 @@ pub fn compile_svg(input: Dict) -> color_eyre::Result<String> {
         bail!("typst had warnings: {:#?}", warnings);
     }
 
-    let output_pages: Vec<Page> = warned_document.output?.pages;
+    let output_pages = warned_document.output?.pages;
     if output_pages.len() > 1 {
         bail!("output document has multiple pages!")
     }

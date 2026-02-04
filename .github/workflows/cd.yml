@@ -9,27 +9,28 @@ env:
 
 jobs:
   github_build:
-    name: Build release binaries
+    name: build release binaries
     strategy:
       fail-fast: false
       matrix:
         include:
-          # - target: aarch64-unknown-linux-musl
-          #   os: ubuntu-latest
-          #   name: aarch64-unknown-linux-musl.tar.gz
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             name: x86_64-unknown-linux-gnu.tar.gz
-          # - target: x86_64-unknown-linux-musl
-          #   os: ubuntu-latest
-          #   name: x86_64-unknown-linux-musl.tar.gz
-          # - target: x86_64-apple-darwin
-          #   os: macOS-latest
-          #   name: x86_64-apple-darwin.tar.gz
+
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            name: x86_64-unknown-linux-musl.tar.gz
+
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            name: aarch64-unknown-linux-musl.tar.gz
 
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          lfs: true
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -37,15 +38,14 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - if: endsWith(matrix.target, '-unknown-linux-musl')
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cross
-
       - name: build
         if: ${{ !endsWith(matrix.target, '-unknown-linux-musl') }}
         run: cargo build --verbose --release --target ${{ matrix.target }}
 
+      - if: endsWith(matrix.target, '-unknown-linux-musl')
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
       - name: build (musl)
         if: endsWith(matrix.target, '-unknown-linux-musl')
         run: cross build --verbose --release --target ${{ matrix.target }}
@@ -55,7 +55,7 @@ jobs:
         run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
         id: extract_tag
 
-      - name: prepare artifacts [-nix]
+      - name: prepare artifacts
         run: |
           mkdir -p target/stage
           cd target/${{ matrix.target }}/release
@@ -69,7 +69,7 @@ jobs:
           overwrite: true
 
   github_release:
-    name: Create GitHub Release
+    name: create github release
     needs: github_build
     permissions:
       contents: write

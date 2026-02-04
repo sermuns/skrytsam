@@ -27,35 +27,8 @@
 
 ![languages](media/example/languages.svg)
 
-## Usage
+### `contributions`
 
-```
-$ skrytsam -h
-
-generate pretty svgs for your profile on GitHub
-
-Usage: skrytsam [OPTIONS] <GITHUB_USERNAME>
-
-Arguments:
-  <GITHUB_USERNAME>  
-
-Options:
-  -o, --output <OUTPUT>
-          [default: languages.svg]
-      --skip-forks
-          don't include repos that are forks
-      --skip-private
-          don't include private repos
-  -s, --skipped-languages <SKIPPED_LANGUAGES>
-          don't include these languages
-  -n, --num-languages <NUM_LANGUAGES>
-          how many languages to show. the rest will be merged into "Other" 0 means i
-nfinite [default: 5]
-  -h, --help
-          Print help
-  -V, --version
-          Print version
-```
 
 ## Installation
 

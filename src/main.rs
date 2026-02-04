@@ -1,6 +1,5 @@
 use clap::Parser;
 use color_eyre::eyre::{WrapErr, bail};
-use derive_typst_intoval::{IntoDict, IntoValue};
 use futures::{StreamExt, stream};
 use indicatif::{ProgressBar, ProgressStyle};
 use octocrab::models::{Repository, repos::Languages};
@@ -12,10 +11,7 @@ use std::{
     path::PathBuf,
     sync::{Arc, LazyLock},
 };
-use typst::foundations::{Dict, IntoValue, Value};
-
-mod render;
-use crate::render::compile_svg;
+use typst_bake::{IntoDict, IntoValue};
 
 #[derive(Parser)]
 #[clap(version, about, long_about = None)]
@@ -43,7 +39,19 @@ struct Args {
     num_languages: usize,
 }
 
-#[derive(Debug, Deserialize, IntoDict, IntoValue)]
+#[derive(IntoValue, IntoDict)]
+struct Language {
+    name: String,
+    color: String,
+    bytes: i64, // FIXME: should be unsigned, but can't be bothered..
+}
+
+#[derive(IntoValue, IntoDict)]
+struct Inputs {
+    languages: Vec<Language>,
+}
+
+#[derive(Debug, Deserialize)]
 struct LinguistLanguage {
     color: Option<String>,
 }
@@ -155,29 +163,26 @@ async fn main() -> color_eyre::Result<()> {
         total_languages_vec.push(("Other".into(), other_bytes));
     }
 
-    let mut input = Dict::new();
+    let languages = total_languages_vec
+        .into_iter()
+        .map(|(name, bytes)| {
+            let color = linguist_languages
+                .get(&name)
+                .and_then(|l| l.color.clone())
+                .unwrap_or_else(|| "#444".to_string());
 
-    let languages_dict = Dict::from_iter(total_languages_vec.iter().map(|(name, bytes)| {
-        (
-            name.as_str().into(),
-            Value::Dict(Dict::from_iter([
-                (
-                    "color".into(),
-                    linguist_languages
-                        .get(name)
-                        .and_then(|l| l.color.clone())
-                        .unwrap_or_else(|| "#444".to_string())
-                        .into_value(),
-                ),
-                ("bytes".into(), bytes.into_value()),
-            ])),
-        )
-    }));
-    input.insert("languages".into(), Value::Dict(languages_dict));
+            Language { name, bytes, color }
+        })
+        .collect();
 
-    let languages_svg = compile_svg(include_str!("../src/languages.typ"), input)?;
+    let output_pages = typst_bake::document!("languages.typ")
+        .with_inputs(Inputs { languages })
+        .to_svg()?;
 
-    fs::write(&ARGS.output, languages_svg)?;
+    if output_pages.len() > 1 {
+        bail!("Generated multiple pages, but only single-page output is supported");
+    }
 
+    fs::write(&ARGS.output, &output_pages[0])?;
     Ok(())
 }

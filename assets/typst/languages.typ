@@ -18,16 +18,15 @@
   "languages",
   // TODO: remove defaults!
   default: (
-    Rust: (color: "#dea584", bytes: 121264),
-    Typst: (color: "#239dad", bytes: 463173),
-    HTML: (color: "#e34c26", bytes: 321322),
-    Others: (color: "#444", bytes: 321322),
+    (name: "Rust", color: "#dea584", bytes: 121264),
+    (name: "Typst", color: "#239dad", bytes: 463173),
+    (name: "HTML", color: "#e34c26", bytes: 321322),
+    (name: "Others", color: "#444", bytes: 321322),
   ),
 )
 #let total_language_bytes = (
-  languages.values().fold(0, (acc, v) => acc + v.bytes)
+  languages.fold(0, (acc, v) => acc + v.bytes)
 )
-#let languages-pairs = languages.pairs()
 
 = Most used languages
 
@@ -38,24 +37,24 @@
     columns: 3,
     gutter: 1em,
     align: (x, y) => horizon + if x == 2 { right } else { left },
-    ..languages-pairs
-      .map(((lang-name, v)) => (
+    ..languages
+      .map(lang => (
         block(
           height: .8em,
           width: .8em,
-          fill: rgb(v.color),
+          fill: rgb(lang.color),
         ),
-        lang-name,
-        [#(calc.round(100 * v.bytes / total_language_bytes, digits: 1)) %],
+        lang.name,
+        [#(calc.round(100 * lang.bytes / total_language_bytes, digits: 1)) %],
       ))
       .flatten(),
   ),
 
   canvas({
-    let colors = languages-pairs.map(((k, v)) => rgb(v.color))
+    let colors = languages.map(lang => rgb(lang.color))
 
     chart.piechart(
-      languages-pairs.map(((k, v)) => (k, v.bytes)),
+      languages.map(lang => (lang.name, lang.bytes)),
       label-key: none,
       value-key: 1,
       radius: 2,

@@ -16,19 +16,33 @@ const MONASPACE_KRYPTON: &[u8] = include_bytes!("../assets/MonaspaceKrypton-Regu
 const MONASPACE_KRYPTON_BOLD: &[u8] = include_bytes!("../assets/MonaspaceKrypton-Bold.otf");
 
 #[derive(Embed)]
-#[folder = "typst/"]
-#[exclude = "**/tests/*"]
-#[exclude = "**/gallery/*"]
+#[folder = "typst/src/"]
 struct TypstSource;
 
-impl TypstSource {
+#[derive(Embed)]
+#[folder = "typst/packages/"]
+#[include = "*.typ"]
+#[exclude = "**/tests/*"]
+#[exclude = "**/gallery/*"]
+#[prefix = "/usr/local/share/typst/packages/local/"]
+struct TypstPackageSource;
+
+#[derive(Embed)]
+#[folder = "typst/packages/"]
+#[include = "*.typ"]
+#[exclude = "**/tests/*"]
+#[exclude = "**/gallery/*"]
+#[prefix = "/usr/local/share/typst/packages/local/"]
+struct TypstPackageFile;
+
+trait EmbedExt: Embed {
     fn iter_sources() -> impl Iterator<Item = Source> {
-        TypstSource::iter().filter_map(|path| {
+        Self::iter().filter_map(|path| {
             dbg!(&path);
-            let embedded_file = TypstSource::get(&path)?;
+            let embedded_file = Self::get(&path)?;
 
             let contents = match embedded_file.data {
-                Cow::Borrowed(bytes) => std::str::from_utf8(bytes).ok()?.to_string(),
+                Cow::Borrowed(bytes) => std::str::from_utf8(bytes).ok()?.to_owned(),
                 Cow::Owned(bytes) => String::from_utf8(bytes).ok()?,
             };
 
@@ -37,10 +51,28 @@ impl TypstSource {
         })
     }
 }
+impl<T: Embed> EmbedExt for T {}
+
+impl TypstPackageFile {
+    fn iter_contents() -> impl Iterator<Item = (FileId, Vec<u8>)> {
+        Self::iter().filter_map(|path| {
+            let embedded_file = Self::get(&path)?;
+
+            let contents = match embedded_file.data {
+                Cow::Borrowed(bytes) => bytes.to_vec(),
+                Cow::Owned(bytes) => bytes,
+            };
+
+            Some((FileId::new(package, path), contents))
+        })
+    }
+}
 
 pub fn compile_svg(input: Dict) -> color_eyre::Result<String> {
     let engine = TypstEngine::builder()
         .with_static_source_file_resolver(TypstSource::iter_sources())
+        .with_static_source_file_resolver(TypstPackageSource::iter_sources())
+        .with_static_file_resolver(TypstPackageFile::iter_contents())
         .fonts([
             NOTO_SANS_REGULAR,
             NOTO_SANS_BOLD,

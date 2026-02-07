@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0](https://github.com/sermuns/skrytsam/compare/v0.1.5...v0.2.0) - 2026-02-07
+
+### Added
+
+- [**breaking**] change default values for flags
+- add --skip-archived
+- change to subcommands, add `languages`
+
+### Other
+
+- use less specific versions
+- use typst-bake git
+- remove unused imports
+- remove usage from README
+
 ## [0.1.5](https://github.com/sermuns/skrytsam/compare/v0.1.4...v0.1.5) - 2026-02-04
 
 ### Fixed

@@ -92,6 +92,9 @@ pub async fn generate(
                 if skip_private && repo.private.unwrap() {
                     return None;
                 }
+                if skip_archived && repo.archived.unwrap() {
+                    return None;
+                }
                 let repo_id = repo.id;
 
                 // FIXME: dont' create an octocrab instance...

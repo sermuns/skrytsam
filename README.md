@@ -30,32 +30,24 @@
 
 ## Usage
 
-```present sh -c '$CARGO_TARGET_DIR/debug/skrytsam -h'
-$ skrytsam -h
-
+```present cargo run -- -h
 generate pretty svgs for your profile on GitHub
 
-Usage: skrytsam [OPTIONS] <GITHUB_USERNAME>
+Usage: skrytsam [OPTIONS] <GITHUB_USERNAME> <COMMAND>
+
+Commands:
+  languages  
+  help       Print this message or the help of the given subcommand(s)
 
 Arguments:
   <GITHUB_USERNAME>  
 
 Options:
-  -o, --output <OUTPUT>
-          [default: languages.svg]
-      --skip-forks
-          don't include repos that are forks
-      --skip-private
-          don't include private repos
-  -s, --skipped-languages <SKIPPED_LANGUAGES>
-          don't include these languages
-  -n, --num-languages <NUM_LANGUAGES>
-          how many languages to show. the rest will be merged into "Other" 0 means i
-nfinite [default: 5]
-  -h, --help
-          Print help
-  -V, --version
-          Print version
+      --skip-forks     don't include repos that are forks
+      --skip-private   don't include private repos
+      --skip-archived  don't include archived repos
+  -h, --help           Print help
+  -V, --version        Print version
 ```
 
 ## Installation

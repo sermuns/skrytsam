@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.1](https://github.com/sermuns/skrytsam/compare/v0.2.0...v0.2.1) - 2026-02-07
+
+### Added
+
+- concurrently fetch pages of repos
+
+### Other
+
+- use correct parameter..
+
 ## [0.2.0](https://github.com/sermuns/skrytsam/compare/v0.1.5...v0.2.0) - 2026-02-07
 
 ### Added

@@ -11,11 +11,11 @@ pub struct Cli {
     pub skip_forks: bool,
 
     /// don't include private repos
-    #[arg(long, default_value_t = true)]
+    #[arg(long, default_value_t = false)]
     pub skip_private: bool,
 
     /// don't include archived repos
-    #[arg(long, default_value_t = true)]
+    #[arg(long, default_value_t = false)]
     pub skip_archived: bool,
 
     #[command(subcommand)]

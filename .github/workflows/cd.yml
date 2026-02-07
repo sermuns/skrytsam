@@ -97,5 +97,6 @@ jobs:
       - name: publish
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/*
+          files: artifacts/**
           body_path: RELEASE.md
+          fails_on_unmatched_files: true

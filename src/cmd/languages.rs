@@ -1,8 +1,10 @@
-use color_eyre::eyre::{WrapErr, bail};
+use color_eyre::eyre::{self, WrapErr, bail};
+use futures::TryStreamExt;
 use futures::{StreamExt, stream};
 use indicatif::{ProgressBar, ProgressStyle};
 use octocrab::models::{Repository, repos::Languages};
 use serde::Deserialize;
+use std::time::Duration;
 use std::{collections::HashMap, fs, io::Cursor, path::PathBuf, sync::Arc};
 use typst_bake::{IntoDict, IntoValue};
 
@@ -53,39 +55,70 @@ pub async fn generate(
 
     let github_api_token = std::env::var("GITHUB_TOKEN")
         .wrap_err("GITHUB_TOKEN is needed to avoid rate-limitation")?;
-    let octocrab = Arc::new(
+    let crab = Arc::new(
         octocrab::Octocrab::builder()
             .personal_token(github_api_token)
             .build()?,
     );
 
-    let user = octocrab.users(github_username);
-
-    // TODO: make this concurrent..
-    let mut repos: Vec<Repository> = Vec::new();
-    for page_num in 1..u32::MAX {
-        let mut page = user.repos().page(page_num).send().await?;
-        let is_last_page = page.next.is_none();
-        repos.append(&mut page.items);
-        if is_last_page {
-            break;
-        }
-    }
-
-    let pb = Arc::new(
-        ProgressBar::new(repos.len() as u64).with_style(
-            ProgressStyle::with_template("[{elapsed_precise}] {wide_bar} {pos:>7}/{len:7} {msg}")
-                .unwrap(),
-        ),
+    let pages_pb = ProgressBar::new_spinner().with_style(
+        ProgressStyle::with_template("[{spinner}] {elapsed} | Fetching repos... {pos}").unwrap(),
     );
+    pages_pb.enable_steady_tick(Duration::from_millis(100));
+
+    let user = crab.users(github_username);
+
+    let first_page = user.repos().per_page(100).send().await?;
+
+    let repos: Vec<Repository> = if let Some(last_page_uri) = first_page.last {
+        let last_page_query = last_page_uri.query().unwrap();
+        let last_page_num = last_page_query
+            .split('&')
+            .find_map(|param| {
+                let mut split = param.split('=');
+                let key = split.next()?;
+                let value = split.next()?;
+                (key == "page").then_some(value.parse::<u32>().ok()?)
+            })
+            .unwrap();
+        stream::iter(2..=last_page_num)
+            .map(|page_num| {
+                let user = &user;
+                let pages_pb = &pages_pb;
+                async move {
+                    let page = user.repos().per_page(100).page(page_num).send().await?;
+                    pages_pb.inc(page.items.len() as u64);
+                    eyre::Ok(page)
+                }
+            })
+            .buffer_unordered(10)
+            .try_fold(first_page.items, |mut acc, page| async move {
+                acc.extend(page.items);
+                eyre::Ok(acc)
+            })
+            .await?
+    } else {
+        first_page.items
+    };
+
+    pages_pb.finish();
+
+    println!(
+        "Fetched {} repos! Fetching language statistics for these...",
+        repos.len()
+    );
+
+    let repo_pb = Arc::new(ProgressBar::new(repos.len() as u64).with_style(
+        ProgressStyle::with_template("[{elapsed}] {wide_bar} {pos:>7}/{len:7} {msg}").unwrap(),
+    ));
 
     let repo_language_hashmaps: Vec<_> = stream::iter(repos.into_iter())
         .map(|repo| {
-            let pb = pb.clone();
-            let octocrab = octocrab.clone();
+            let repo_pb = &repo_pb;
+            let crab = &crab;
             let skipped_languages = &skipped_languages;
             async move {
-                pb.set_message(repo.name);
+                repo_pb.set_message(repo.name);
                 if skip_forks && repo.fork.unwrap() {
                     return None;
                 }
@@ -98,7 +131,7 @@ pub async fn generate(
                 let repo_id = repo.id;
 
                 // FIXME: dont' create an octocrab instance...
-                let languages = octocrab
+                let languages = crab
                     .repos_by_id(repo_id)
                     .list_languages()
                     .await
@@ -115,7 +148,9 @@ pub async fn generate(
         .buffer_unordered(10)
         .collect()
         .await;
-    pb.finish();
+
+    repo_pb.finish();
+
     let mut total_languages = Languages::new();
     for hashmap in repo_language_hashmaps.into_iter().flatten() {
         for (lang_name, bytes) in hashmap {
@@ -158,5 +193,7 @@ pub async fn generate(
     }
 
     fs::write(&output, &output_pages[0])?;
+
+    println!("Done! Outputted to `{}`", output.display());
     Ok(())
 }

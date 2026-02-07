@@ -1,0 +1,6 @@
+[[repos]]
+repo = "builtin"
+hooks = [
+    {id = "check-added-large-files"},
+    {id = "check-symlinks"},
+]

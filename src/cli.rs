@@ -24,6 +24,7 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// pie chart of top used languages in user's repos
     Languages {
         /// don't include these languages
         #[arg(short, long, value_delimiter = ',')]
@@ -36,6 +37,11 @@ pub enum Commands {
         num_languages: usize,
 
         #[arg(short, long, default_value = "languages.svg")]
+        output: PathBuf,
+    },
+    /// general stats of forks, PRs, issues
+    Contributions {
+        #[arg(short, long, default_value = "contributions.svg")]
         output: PathBuf,
     },
 }

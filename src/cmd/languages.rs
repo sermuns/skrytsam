@@ -34,12 +34,6 @@ pub async fn generate(
     num_languages: usize,
     output: PathBuf,
 ) -> color_eyre::Result<()> {
-    if output.is_dir() {
-        bail!("output must be a file. got `{}`", output.display());
-    } else if output.extension().is_some_and(|ext| ext != "svg") {
-        bail!("output must end in .svg. got `{}`", output.display());
-    }
-
     let linguist_languages: HashMap<String, LinguistLanguage> = serde_saphyr::from_reader(
         Cursor::new(&mut include_bytes!("../../assets/languages.yml")),
     )?;

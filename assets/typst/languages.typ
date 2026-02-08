@@ -1,5 +1,5 @@
 #import "lib.typ": card
-#show: card
+#show: card.with(color: sys.inputs.at("color", default: none))
 
 #import "@preview/cetz:0.4.2": canvas
 #import "@preview/cetz-plot:0.1.3": chart

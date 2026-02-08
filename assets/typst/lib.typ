@@ -1,13 +1,21 @@
-#let card(body) = {
+#let default-color = blue.desaturate(50%)
+
+#let card(body, color: none) = {
+  let color = if color == none {
+    default-color
+  } else {
+    color
+  }
+
   set page(
     width: auto,
     height: auto,
     margin: 1em,
-    fill: blue.desaturate(50%).darken(75%),
+    fill: color.darken(75%),
   )
   set text(
     font: "Monaspace Krypton",
-    fill: luma(90%),
+    fill: color.lighten(70%),
   )
   set grid(gutter: 1em)
   show heading: set block(below: 1em)

@@ -1,22 +1,12 @@
+#import "lib.typ": card
+#show: card
+
 #import "@preview/cetz:0.4.2": canvas
 #import "@preview/cetz-plot:0.1.3": chart
 
-#set page(
-  width: auto,
-  height: auto,
-  margin: 1em,
-  fill: blue.desaturate(50%).darken(75%),
-)
-#set text(
-  // font: sys.inputs.at("font", default: "Noto Sans"),
-  font: "Monaspace Krypton",
-  fill: luma(90%),
-)
-#show heading: set block(below: 1em)
 
 #let languages = sys.inputs.at(
   "languages",
-  // TODO: remove defaults!
   default: (
     (name: "Rust", color: "#dea584", bytes: 121264),
     (name: "Typst", color: "#239dad", bytes: 463173),
@@ -32,10 +22,8 @@
 
 #grid(
   columns: 2,
-  gutter: 1em,
   grid(
     columns: 3,
-    gutter: 1em,
     align: (x, y) => horizon + if x == 2 { right } else { left },
     ..languages
       .map(lang => (

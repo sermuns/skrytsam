@@ -40,7 +40,7 @@ pub async fn generate(
         bail!("output must end in .svg. got `{}`", output.display());
     }
 
-    let linguist_languages: HashMap<String, LinguistLanguage> = serde_yaml_ng::from_reader(
+    let linguist_languages: HashMap<String, LinguistLanguage> = serde_saphyr::from_reader(
         Cursor::new(&mut include_bytes!("../../assets/languages.yml")),
     )?;
 

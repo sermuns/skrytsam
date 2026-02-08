@@ -78,12 +78,10 @@ pub async fn generate(
         ProgressStyle::with_template("[{elapsed}] {wide_bar} {pos:>7}/{len:7} {msg}").unwrap(),
     ));
 
-    todo!();
-
     repo_pb.finish();
 
     let output_pages = typst_bake::document!("contributions.typ")
-        .with_inputs(todo!())
+        // .with_inputs(todo!())
         .to_svg()?;
 
     if output_pages.len() > 1 {

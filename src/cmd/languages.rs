@@ -103,7 +103,7 @@ pub async fn generate(
 
     pages_pb.finish();
 
-    println!(
+    eprintln!(
         "Fetched {} repos! Fetching language statistics for these...",
         repos.len()
     );
@@ -192,8 +192,12 @@ pub async fn generate(
         bail!("Generated multiple pages, but only single-page output is supported");
     }
 
-    fs::write(&output, &output_pages[0])?;
+    if &output == "-" {
+        println!("{}", output_pages[0]);
+    } else {
+        fs::write(&output, &output_pages[0])?;
+        println!("Done! Outputted to `{}`", output.display());
+    }
 
-    println!("Done! Outputted to `{}`", output.display());
     Ok(())
 }

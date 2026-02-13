@@ -21,11 +21,6 @@
 
 `skrytsam` is a command-line tool that fetches GitHub profile statistics and generates SVG cards for use in your profile README.
 
-## Cards
-
-### `languages`
-
-![languages](media/example/languages.svg)
 
 
 ## Usage
@@ -48,6 +43,26 @@ Options:
       --skip-archived  don't include archived repos
   -h, --help           Print help
   -V, --version        Print version
+```
+
+## Cards
+
+### `languages`
+
+![languages](media/example/languages.svg)
+
+```present cargo run -- languages -h
+Usage: skrytsam <GITHUB_USERNAME> languages [OPTIONS]
+
+Options:
+  -s, --skipped-languages <SKIPPED_LANGUAGES>
+          don't include these languages
+  -n, --num-languages <NUM_LANGUAGES>
+          how many languages to show the rest will be merged into "Other" 0 means infinite [default: 5]
+  -o, --output <OUTPUT>
+          where to put output svg `-` to use stdout [default: languages.svg]
+  -h, --help
+          Print help
 ```
 
 ## Installation

@@ -35,6 +35,8 @@ pub enum Commands {
         #[arg(short, long, default_value_t = 5)]
         num_languages: usize,
 
+        /// where to put output svg
+        /// `-` to use stdout
         #[arg(short, long, default_value = "languages.svg")]
         output: PathBuf,
     },

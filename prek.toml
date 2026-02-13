@@ -1,6 +1,19 @@
 [[repos]]
 repo = "builtin"
+[[repos.hooks]]
+id = "check-added-large-files"
+[[repos.hooks]]
+id = "check-symlinks"
+
+
+[[repos]]
+repo = "local"
 hooks = [
-    {id = "check-added-large-files"},
-    {id = "check-symlinks"},
+  {
+    id = "update-present-blocks-in-readme",
+    name = "update `present` blocks in README.md",
+    language = "system",
+    entry = "present --in-place",
+    pass_filenames = false,
+  }
 ]

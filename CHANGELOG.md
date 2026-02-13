@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.2](https://github.com/sermuns/skrytsam/compare/v0.2.1...v0.2.2) - 2026-02-13
+
+### Added
+
+- allow stdout output with `-o -`
+
+### Other
+
+- add prek present task
+- use less default features. use serde_saphyr, use latest typst-bake
+
 ## [0.2.1](https://github.com/sermuns/skrytsam/compare/v0.2.0...v0.2.1) - 2026-02-07
 
 ### Added
